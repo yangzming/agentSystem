@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>产品列表</title>
+    <include file="Public/head"/>
+    <style>
+        .laytable-cell-1-pc_pic img{
+            height: 100%;
+            max-width: 100%;
+        }
+        .laytable-cell-1-product_thumb img{
+            height: 100%;
+            max-width: 100%;
+        }
+        .laytable-cell-1-wap_pic img{
+            height: 100%;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+
+    <include file="Public/header" title="首页"/>
+
+    <include file="Public/left" />
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-input-inline">
+                <input type="text" name="search" required  lay-verify="required" placeholder="搜索编号或标题" autocomplete="off" class="layui-input">
+            </div>
+            <button class="layui-btn" onclick="initProduct();">确认</button>
+
+            <a class="layui-btn" href="{:U('Product/operate')}">添加产品</a>
+
+            <table class="layui-hide" id="product_list" lay-filter="product"></table>
+        </div>
+    </div>
+
+    <include file="Public/footer" />
+
+</div>
+<script>
+    initProduct();
+
+    // 回车搜索
+    $('input[name="search"]').on('keydown', function (e) {
+        if (e.keyCode === 13) {
+            initProduct();
+        }
+    });
+
+    function initProduct() {
+        layui.use(['table'], function () {
+            var table = layui.table,
+                layer = layui.layer;
+            var search = $('input[name="search"]').val();
+            var tableIns = table.render({
+                elem: '#product_list',
+                url: "{:U('Product/index')}",
+                method: 'post',
+                where: {search: search},
+                page: true,
+                limits: [5, 10, 25, 50],
+                limit: 10,
+                height: 400,
+                cols: [[
+                    {field: 'product_number', title: '编号', width: 120, align:'center'},
+                    {field: 'cate_name', title: '所属分类', width: 150, align:'center'},
+                    {field: 'product_title', title: '标题', align:'center'},
+                    {field: 'demourl', title: '演示地址', align:'center', templet: '#demourl'},
+                    {title: '操作', align:'center', width: 160, toolbar: '#view_detail'}
+                ]]
+            });
+
+            //监听工具条
+            table.on('tool(product)', function(obj){
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event;
+                var tr = obj.tr;
+
+                if(layEvent === 'del'){ //删除
+                    layer.confirm('真的删除该行', function(index){
+                        $.post("{:U('Product/del')}", {product_id: data.product_id}, function (res) {
+                            layer.msg(res.msg);
+                            if (res.code === 200) {
+                                layer.close(index);
+                                obj.del();
+                            }
+                        });
+                        //向服务端发送删除指令
+                    });
+                }
+            });
+
+        });
+    }
+</script>
+<script type="text/html" id="demourl">
+    <a href="http://{{d.demourl}}" class="layui-table-link" target="_blank">{{ d.demourl }}</a>
+</script>
+<script type="text/html" id="pc_pic">
+    <img src="{{d.pc_pic}}" alt="">
+</script>
+<script type="text/html" id="product_thumb">
+    <img src="{{d.product_thumb}}" alt="">
+</script>
+<script type="text/html" id="wap_pic">
+    <div><img src="{{d.wap_pic}}" alt=""></div>
+</script>
+<script type="text/html" id="view_detail">
+    <div>
+    <a class="layui-btn layui-btn-xs" href="{:U('Product/operate')}/pid/{{d.product_id}}">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </div>
+</script>
+</body>
+</html>

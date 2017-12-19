@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>客户列表</title>
+    <include file="Public/head"/>
+</head>
+<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+
+        <include file="Public/header" title="首页"/>
+
+        <include file="Public/left" />
+
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <div style="padding: 15px;">
+                <div class="layui-input-inline">
+                    <input type="text" name="search" required  lay-verify="required" placeholder="搜索用户名、电话或者网址" autocomplete="off" class="layui-input">
+                </div>
+                <button class="layui-btn" id="search" onclick="initCustomer();">确认</button>
+                <table class="layui-hide" id="customer_list" lay-filter="customer"></table>
+            </div>
+        </div>
+
+        <include file="Public/footer" />
+
+    </div>
+    <script>
+        initCustomer();
+
+        // 回车搜索
+        $('input[name="search"]').on('keydown', function (e) {
+            if (e.keyCode === 13) {
+                initCustomer();
+            }
+        });
+        
+        function initCustomer() {
+            layui.use(['table'], function () {
+                var table = layui.table,
+                    layer = layui.layer;
+
+                var search = $('input[name="search"]').val();
+                var tableIns = table.render({
+                    elem: '#customer_list',
+                    url: "{:U('Custom/index')}",
+                    method: 'post',
+                    where: {search: search},
+                    page: true,
+                    limits: [5, 10, 25, 50],
+                    limit: 10,
+                    height: 430,
+                    cols: [[
+                        {field: 'index', title: '序号', width: 60, align:'center'},
+                        {field: 'username', title: '用户名', width: 160, align:'center'},
+                        {field: 'telephone', title: '电话', width: 116, align:'center'},
+                        {field: 'qq', title: 'QQ', width: 110, align:'center'},
+                        {field: 'website', title: '网址', align:'center', templet: '#websiteTpl'},
+                        {field: 'add_time', title: '创建时间', width: 160, align:'center', sort: true},
+                        {field: 'status_name', title: '登录状态', width: 90, align:'center', toolbar: '#status'},
+                        {title: '操作', width: 115, align:'center', toolbar: '#view_detail'}
+                    ]]
+                });
+
+                //监听工具条
+                table.on('tool(customer)', function(obj){
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event;
+                    var tr = obj.tr;
+
+                    if(layEvent === 'check'){
+                        var tip = data.status == 1 ? '禁止登录' : '允许登录';
+                        layer.confirm('确定授权该用户' + tip, function (index) {
+                            $.post("{:U('Custom/auth')}", {customer_id: data.customer_id, status: data.status}, function (res) {
+                                layer.msg(res.msg);
+                                if (res.code === 200) {
+                                    initCustomer();
+                                }
+                            });
+                        });
+                    } else if(layEvent === 'del'){ //删除
+                        layer.confirm('真的删除该行', function(index){
+                            $.post("{:U('Custom/del')}", {customer_id: data.customer_id}, function (res) {
+                                layer.msg(res.msg);
+                                if (res.code === 200) {
+                                    layer.close(index);
+                                    obj.del();
+                                }
+                            });
+                            //向服务端发送删除指令
+                        });
+                    }
+                });
+
+            });
+        }
+    </script>
+    <script type="text/html" id="websiteTpl">
+        <a href="http://{{d.website}}" class="layui-table-link" target="_blank">{{ d.website }}</a>
+    </script>
+    <script type="text/html" id="status">
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="check">{{d.status_name}}</a>
+    </script>
+    <script type="text/html" id="view_detail">
+        <a class="layui-btn layui-btn-xs" href="{:U('Custom/edit')}/cid/{{d.customer_id}}">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+</body>
+</html>

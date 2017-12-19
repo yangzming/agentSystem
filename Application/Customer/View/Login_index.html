@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>客户登录页面</title>
+    <link rel="stylesheet" href="__PUBLIC__/Customer/css/style.css">
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css">
+    <style>
+        body{
+            background-color: #2E363F;
+        }
+    </style>
+</head>
+<body>
+<div class="loginbox">
+    <form class="layui-form layui-form-pane" action="javascript:;">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend style="text-align: center;">用户登录</legend>
+        </fieldset>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <a class="layui-btn layui-btn-primary" href="{:U('Login/register')}">注册</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="__PUBLIC__/js/jquery-3.2.1.min.js"></script>
+<script src="__PUBLIC__/layui/layui.js"></script>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer;
+        //自定义验证规则
+        form.verify({
+            username: function(value){
+                if (escape(value).indexOf( "%u" ) > 0) {
+                    return '用户名不能为中文';
+                }
+            }
+            ,password: [/(.+){6,12}$/, '密码必须6到12位']
+        });
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            var _data = {
+                username: data.field.username,
+                password: data.field.password
+            };
+            $.post("{:U('Login/index')}", _data, function (res) {
+                layer.msg(res.msg);
+                if (res.code === 200) {
+                    setTimeout(function () {
+                        window.location.href = "{:U('Index/index')}";
+                    }, 1000)
+                }
+            });
+        });
+    })
+</script>
+</body>
+</html>

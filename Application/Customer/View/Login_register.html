@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>客户注册页面</title>
+    <link rel="stylesheet" href="__CUSTOMER__/css/style.css">
+    <link rel="stylesheet" href="__PUBLIC__/layui/css/layui.css">
+    <style>
+        body{
+            background-color: #2E363F;
+        }
+    </style>
+</head>
+<body>
+<div class="loginbox">
+    <form class="layui-form layui-form-pane" action="javascript:;">
+        <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+            <legend style="text-align: center;">用户注册</legend>
+        </fieldset>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" required  lay-verify="required|username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" required lay-verify="required|password" placeholder="请输入密码" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">电话</label>
+            <div class="layui-input-block">
+                <input type="text" name="telephone" required maxlength="11"  lay-verify="required|phone" placeholder="请输入电话" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">QQ</label>
+            <div class="layui-input-block">
+                <input type="text" name="qq" maxlength="13" lay-verify="qq" placeholder="请输入QQ" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">网址</label>
+            <div class="layui-input-block">
+                <input type="text" name="website" value="" required lay-verify="required|website" placeholder="请输入域名如：baidu.com" autocomplete="off" class="layui-input">
+            </div>
+            <div class="layui-form-mid layui-word-aux">注：网址填写后不能更改，如需更改请联系QQ387855321或拨打服务热线: 4008-168-332</div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <a class="layui-btn layui-btn-primary" href="{:U('Login/index')}">返回登录</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="__PUBLIC__/js/jquery-3.2.1.min.js"></script>
+<script src="__PUBLIC__/layui/layui.js"></script>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer;
+        //自定义验证规则
+        form.verify({
+            username: function(value){
+                if (/.*[\u4e00-\u9fa5]+.*$/.test(value)) {
+                    return '用户名不能为中文';
+                } else if (value.length > 50) {
+                    return '用户名不能多于50个字符';
+                }
+            }
+            ,password: [/(.+){6,12}$/, '密码必须6到12位']
+            ,qq: function (value) {
+                if (/^[1-9][0-9]{4,9}$/.test(value) == false) {
+                    return '请输入正确的qq号';
+                }
+            }
+            ,website: [/(^#)|([^\s]+\.[^\s]+)/, "链接格式不正确"]
+        });
+        //监听提交
+        var flag = true;
+        form.on('submit(formDemo)', function(data){
+            if (flag === false) {
+                layer.msg('您的操作太频繁了', {time: 1000});
+                setTimeout(function () {
+                    window.location.href = "{:U('Login/index')}"
+                }, 1000)
+            }
+            var _data = {
+                username: data.field.username,
+                password: data.field.password,
+                telephone: data.field.telephone,
+                qq: data.field.qq,
+                website: data.field.website
+            };
+            $.post("{:U('Login/register')}", _data, function (res) {
+                flag = false;
+                if (res.code === 200) {
+                    layer.alert(res.msg, function () {
+                        window.location.href = "{:U('Login/index')}";
+                    });
+                } else {
+                    layer.msg(res.msg, {time: 1500});
+                    return false;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

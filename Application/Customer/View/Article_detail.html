@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>文章详情</title>
+    <include file="Public/head"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <include file="Public/header"/>
+
+    <include file="Public/left"/>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div class="layui-container">
+            <div class="layui-row">
+                <div class="layui-col-md10">
+                    <div class="article-detail">
+                        <h2>{$item['article_title']}</h2>
+                        <div class="info">
+                            <div class="time">{$item['add_time']}</div>
+                        </div>
+                        <div class="detail-body layui-text">
+                            {$item['article_content']|htmlspecialchars_decode}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <include file="Public/footer"/>
+</div>
+<script>
+    layui.use(['laypage', 'layer'], function () {
+        var laypage = layui.laypage;
+
+        laypage.render({
+            elem: 'article-page'
+            ,count: "{$page['total']}"
+            ,limit: "{$page['limit']}"
+            ,curr: "{$page['page']}"
+            ,layout: ['count', 'prev', 'page', 'next', 'limit', 'skip']
+            ,jump: function(obj, first){
+                var curr = obj.curr;
+                if (!first) {
+                    window.location.href = "{:U('Article/index', array('cid' => $_GET['cid']))}" + '?page=' + curr;
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

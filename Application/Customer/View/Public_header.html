@@ -1,0 +1,35 @@
+<div class="layui-header">
+    <div class="layui-logo">客户管理系统</div>
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item">
+            <a href="javascript:;">
+                <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                {:decrypt(session('customer_info.username'))}
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a href="{:U('Client/info')}">基本资料</a></dd>
+                <dd><a href="{:U('Client/password')}">修改密码</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item"><a href="javascript:;" onclick="loginOut()">退出登录</a></li>
+    </ul>
+</div>
+<script>
+    layui.use('element', function(){});
+</script>
+<script>
+    function loginOut() {
+        layui.use(['layer'], function () {
+            var layer = layui.layer;
+            layer.confirm('确定退出登录？', function () {
+                $.get("{:U('Login/loginOut')}", function (res) {
+                    layer.msg(res.msg, {time: 1000});
+                    setTimeout(function () {
+                        window.location.href = "{:U('Login/index')}";
+                    }, 1000)
+                });
+            });
+        });
+    }
+</script>

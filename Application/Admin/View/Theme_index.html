@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>主题列表</title>
+    <include file="Public/head"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+
+    <include file="Public/header" title="首页"/>
+
+    <include file="Public/left" />
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <button class="layui-btn" id="operateTheme">添加主题</button>
+
+            <table class="layui-hide" id="theme_list" lay-filter="theme"></table>
+        </div>
+    </div>
+
+    <include file="Public/footer" />
+
+</div>
+<script>
+    initTheme();
+
+    $('#operateTheme').on('click', function () {
+        layui.layer.prompt({title: '请输入主题名', formType: 0, value: '', maxlength: 8, success: function (layero, index) {
+            $(".layui-layer-input").on('keydown',function(e){
+                if(e.keyCode === 13){
+                    var theme_name = $(this).val();
+                    var data = {
+                        theme_name: theme_name,
+                        theme_id: ""
+                    };
+                    operateTheme(data);
+                }
+            });
+        }}, function(value, index, elem){
+            var data = {
+                theme_name: value,
+                theme_id: ""
+            };
+            operateTheme(data);
+        });
+    });
+
+    // 操作分类
+    function operateTheme(data) {
+        if (/.*[\u4e00-\u9fa5]+.*$/.test(data.theme_name)) {
+            layer.msg('主题只能输入英文或者数字', {time: 1000});
+            return;
+        }
+        $.post("{:U('Theme/operate')}", data, function (res) {
+            layer.closeAll();
+            if(res.code === 200){
+                layer.msg(res.msg, {icon: 1,time:1000});
+                setTimeout(function () {
+                    initTheme();
+                }, 1000)
+            } else {
+                layer.msg(res.msg, {icon: 0,time:1000});
+                return false;
+            }
+        });
+    }
+    
+    // 初始化
+    function initTheme() {
+        layui.use(['table'], function () {
+            var table = layui.table,
+                layer = layui.layer;
+            var tableIns = table.render({
+                elem: '#theme_list',
+                url: "{:U('Theme/index')}",
+                method: 'post',
+                where: {},
+                page: true,
+                limits: [5, 10, 25, 50],
+                limit: 10,
+                height: 400,
+                cols: [[
+                    {field: 'theme_id', title: '序号', width: 80, align:'center'},
+                    {field: 'theme_name', title: '主题名', align:'center'},
+                    {title: '操作', width: 140, align:'center', toolbar: '#view_detail'}
+                ]]
+            });
+
+            //监听工具条
+            table.on('tool(theme)', function(obj){
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event;
+                var tr = obj.tr;
+
+                if(layEvent === 'edit'){
+                    var theme_id = data.theme_id;
+                    layer.prompt({title: '请输入主题名', formType: 0, value: data.theme_name, success: function (layero, index) {
+                        $(".layui-layer-input").on('keydown',function(e){
+                            if(e.keyCode === 13){
+                                var theme_name = $(this).val();
+                                var data = {
+                                    theme_id: theme_id,
+                                    theme_name: theme_name
+                                };
+                                operateTheme(data);
+                            }
+                        });
+                    }}, function(value, index, elem){
+                        var data = {
+                            theme_id: theme_id,
+                            theme_name: value
+                        };
+                        operateTheme(data);
+                    });
+                } else if(layEvent === 'del'){
+                    layer.confirm('真的删除该分类？', function(index){
+                        $.post("{:U('Theme/del')}", {theme_id: data.theme_id}, function (res) {
+                            layer.msg(res.msg, {time: 1000});
+                            if (res.code === 200) {
+                                layer.close(index);
+                                obj.del();
+                            }
+                        });
+                    });
+                }
+            });
+
+        });
+    }
+</script>
+<script type="text/html" id="view_detail">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+</body>
+</html>

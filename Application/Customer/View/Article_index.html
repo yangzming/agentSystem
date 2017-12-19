@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>文章列表</title>
+    <include file="Public/head"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <include file="Public/header"/>
+
+    <include file="Public/left"/>
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <div class="layui-fluid article-box">
+                <div class="layui-row">
+                    <volist name="article_list" id="vo">
+                        <div class="layui-col-md3">
+                            <div class="article-item">
+                                <div class="thum">
+                                    <a href="{:U('Article/detail', array('cid' => $vo['cate_id'], 'aid' => $vo['article_id']))}"><img src="{$vo.article_thumb}"></a>
+                                </div>
+                                <h4 class="title"><a href="{:U('Article/detail', array('cid' => $vo['cate_id'], 'aid' => $vo['article_id']))}">{$vo.article_title}</a></h4>
+                                <div class="info">
+                                    <span class="time">{$vo.add_time}</span>
+
+                                    <div class="j_content">
+                                        {$vo.article_info}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </volist>
+                </div>
+                <notempty name="article_list">
+                    <div id="article-page"></div>
+                </notempty>
+            </div>
+        </div>
+    </div>
+
+    <include file="Public/footer"/>
+</div>
+<script>
+    layui.use(['laypage', 'layer'], function () {
+        var laypage = layui.laypage;
+
+        laypage.render({
+            elem: 'article-page'
+            ,count: "{$page['total']}"
+            ,limit: "{$page['limit']}"
+            ,curr: "{$page['page']}"
+            ,layout: ['count', 'prev', 'page', 'next', 'limit', 'skip']
+            ,jump: function(obj, first){
+                var curr = obj.curr;
+                if (!first) {
+                    window.location.href = "{:U('Article/index', array('cid' => $_GET['cid']))}" + '?page=' + curr;
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

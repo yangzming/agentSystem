@@ -1,0 +1,33 @@
+    <div class="layui-header">
+        <div class="layui-logo">管理员后台</div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    {:decrypt(session('a_info.admin_name'))}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="{:U('System/password')}">修改密码</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="javascript:;" onclick="loginOut()">退出登录</a></li>
+        </ul>
+    </div>
+    <script>
+        layui.use('element', function(){});
+    </script>
+    <script>
+        function loginOut() {
+            layui.use(['layer'], function () {
+                var layer = layui.layer;
+                layer.confirm('确定退出登录？', function () {
+                    $.get("{:U('Login/loginOut')}", function (res) {
+                        layer.msg(res.msg, {time: 1000});
+                        setTimeout(function () {
+                            window.location.href = "{:U('Login/index')}";
+                        }, 1000)
+                    });
+                });
+            });
+        }
+    </script>

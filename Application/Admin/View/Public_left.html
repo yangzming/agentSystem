@@ -1,0 +1,25 @@
+<div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+        <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+        <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+            <li class="layui-nav-item <eq name='Think.CONTROLLER_NAME' value='Index'>layui-this</eq>"><a href="{:U('Index/index')}">首页</a></li>
+            <li class="layui-nav-item <eq name='Think.CONTROLLER_NAME' value='Custom'>layui-this</eq>"><a href="{:U('Custom/index')}">客户列表</a></li>
+            <li class="layui-nav-item <eq name='Think.CONTROLLER_NAME' value='Product'>layui-nav-itemed</eq>" >
+                <a href="jvascript:;">产品</a>
+                <dl class="layui-nav-child">
+                    <dd class="<eq name='Think.ACTION_NAME' value='index'>layui-this</eq><eq name='Think.ACTION_NAME' value='operate'>layui-this</eq>" ><a href="{:U('Product/index')}">产品列表</a></dd>
+                    <dd class="<eq name='Think.ACTION_NAME' value='cate'>layui-this</eq>"><a href="{:U('Product/cate')}">产品分类</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item <eq name='Think.CONTROLLER_NAME' value='Article'>layui-nav-itemed</eq>" >
+                <a href="jvascript:;">文章</a>
+                <dl class="layui-nav-child">
+                    <dd class="<eq name='Think.ACTION_NAME' value='index'>layui-this</eq><eq name='Think.ACTION_NAME' value='operate'>layui-this</eq>"><a href="{:U('Article/index')}">文章列表</a></dd>
+                    <dd class="<eq name='Think.ACTION_NAME' value='cate'>layui-this</eq>"><a href="{:U('Article/cate')}">文章分类</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item <eq name='Think.CONTROLLER_NAME' value='Theme'>layui-this</eq>"><a href="{:U('Theme/index')}">主题设置</a></li>
+            <li class="layui-nav-item"><a href="">联系我们</a></li>
+        </ul>
+    </div>
+</div>

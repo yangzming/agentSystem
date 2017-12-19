@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>文章分类</title>
+    <include file="Public/head"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+
+    <include file="Public/header" title="首页"/>
+
+    <include file="Public/left" />
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <button class="layui-btn" id="operateCate">添加分类</button>
+
+            <table class="layui-hide" id="cate_list" lay-filter="cate"></table>
+        </div>
+    </div>
+
+    <include file="Public/footer" />
+
+</div>
+<script>
+    initCate();
+
+    $('#operateCate').on('click', function () {
+        layui.layer.prompt({title: '请输入分类名', formType: 0, value: '', maxlength: 8, success: function (layero, index) {
+            $(".layui-layer-input").on('keydown',function(e){
+                if(e.keyCode === 13){
+                    var cate_name = $(this).val();
+                    var data = {
+                        cate_name: cate_name,
+                        cate_id: ""
+                    };
+                    operateCate(data);
+                }
+            });
+        }}, function(value, index, elem){
+            var data = {
+                cate_name: value,
+                cate_id: ""
+            };
+            operateCate(data);
+        });
+    });
+
+    // 操作分类
+    function operateCate(data) {
+        $.post("{:U('Article/cateOperate')}", data, function (res) {
+            layer.closeAll();
+            if(res.code === 200){
+                layer.msg(res.msg, {icon: 1,time:1000});
+                setTimeout(function () {
+                    initCate();
+                }, 1000)
+            } else {
+                layer.msg(res.msg, {icon: 0,time:1000});
+                return false;
+            }
+        });
+    }
+    
+    // 初始化
+    function initCate() {
+        layui.use(['table'], function () {
+            var table = layui.table,
+                layer = layui.layer;
+            var tableIns = table.render({
+                elem: '#cate_list',
+                url: "{:U('Article/cate')}",
+                method: 'post',
+                where: {},
+                page: true,
+                limits: [5, 10, 25, 50],
+                limit: 10,
+                height: 400,
+                cols: [[
+                    {field: 'index', title: '序号', width: 80, align:'center'},
+                    {field: 'cate_name', title: '文章类型名', align:'center'},
+                    {field: 'update_time', title: '最后编辑时间', width: 200, align:'center'},
+                    {title: '操作', width: 160, align:'center', toolbar: '#view_detail'}
+                ]]
+            });
+
+            //监听工具条
+            table.on('tool(cate)', function(obj){
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event;
+                var tr = obj.tr;
+
+                if(layEvent === 'edit'){
+                    var cate_id = data.cate_id;
+                    layer.prompt({title: '请输入分类名', formType: 0, value: data.cate_name, success: function (layero, index) {
+                        $(".layui-layer-input").on('keydown',function(e){
+                            if(e.keyCode === 13){
+                                var cate_name = $(this).val();
+                                var data = {
+                                    cate_id: cate_id,
+                                    cate_name: cate_name
+                                };
+                                operateCate(data);
+                            }
+                        });
+                    }}, function(value, index, elem){
+                        var data = {
+                            cate_id: cate_id,
+                            cate_name: value,
+                        };
+                        operateCate(data);
+                    });
+                } else if(layEvent === 'del'){
+                    layer.confirm('真的删除该分类？', function(index){
+                        $.post("{:U('Article/cateDel')}", {cate_id: data.cate_id}, function (res) {
+                            layer.msg(res.msg, {time: 1000});
+                            if (res.code === 200) {
+                                layer.close(index);
+                                obj.del();
+                            }
+                        });
+                    });
+                }
+            });
+
+        });
+    }
+</script>
+<script type="text/html" id="view_detail">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+</body>
+</html>
